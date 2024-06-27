@@ -1,7 +1,7 @@
 '''
 Author: Hongliang Lu, lhl@pku.edu.cn
 Date: 2024-05-31 16:10:12
-LastEditTime: 2024-06-26 12:03:36
+LastEditTime: 2024-06-27 13:46:10
 FilePath: /stockPrediction-master/StockExchange.py
 Description: 
 @Organization: College of Engineering,Peking University.
@@ -10,6 +10,8 @@ Description:
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import torch
+from tqdm import tqdm
 
 
 class StockExchange:
@@ -21,11 +23,11 @@ class StockExchange:
         self.state_size = state_size
         self.stock_length = len(self.train_data)
 
-    def train(self,episodes, eps_start=1.0, eps_end=0.01, eps_decay=0.995):
+    def train(self,episodes,filename, eps_start=1.0, eps_end=0.01, eps_decay=0.995):
         scores = []
-        
-        for i_episode in range(1, episodes+1):
-            print("Episode" + str(i_episode))
+        # 初始化进度条
+        pbar = tqdm(range(1, episodes + 1), desc="Episode")
+        for i_episode in pbar:
             state = self.getState(self.train_data, 0, self.state_size + 1)
             total_profit = 0
             self.agent.balance = []
@@ -47,13 +49,23 @@ class StockExchange:
                 self.agent.step(state, action, reward, next_state, done)
                 eps = max(eps_end, eps * eps_decay)
                 state = next_state
-                if done:
-                    print("------------------------------")
-                    print("total_profit = " + str(total_profit))
-                    print("------------------------------")
                     
             scores.append(total_profit)
-        return scores
+            # 更新进度条的后缀信息
+            pbar.set_postfix(episode=i_episode)
+            
+        model_dir = 'trained_models/'
+        model_name = model_dir + filename + '.pth'
+        
+        torch.save(self.agent.qnetwork_local.state_dict(), model_name)
+        # plot the smoothed scores
+        smoothed_scores = pd.Series(scores).rolling(100).mean()
+        plt.figure(figsize=(8, 5), dpi=150)
+        plt.plot(smoothed_scores)
+        plt.xlabel('Episode')
+        plt.ylabel('Total Profit')
+        plt.show()
+        return None
 
     def getState(self, data, t, n):
         d = t - n + 1

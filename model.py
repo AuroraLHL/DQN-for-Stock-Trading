@@ -1,11 +1,12 @@
 '''
 Author: Hongliang Lu, lhl@pku.edu.cn
-Date: 2018-09-08 23:22:50
-LastEditTime: 2024-06-02 10:41:00
+Date: 2024-06-27 13:50:11
+LastEditTime: 2024-06-27 13:50:17
 FilePath: /stockPrediction-master/model.py
-Description: 
-@Organization: College of Engineering,Peking University.
+Description: The model of the DQN network.
+Organization: College of Engineering,Peking University.
 '''
+
 
 
 import torch
