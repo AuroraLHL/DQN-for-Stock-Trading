@@ -1,8 +1,8 @@
 '''
 Author: Hongliang Lu, lhl@pku.edu.cn
 Date: 2024-05-31 16:10:12
-LastEditTime: 2024-06-27 13:46:10
-FilePath: /stockPrediction-master/StockExchange.py
+LastEditTime: 2024-06-27 14:14:08
+FilePath: /DQN for Stock Trading/StockExchange.py
 Description: 
 @Organization: College of Engineering,Peking University.
 '''
@@ -30,6 +30,7 @@ class StockExchange:
         for i_episode in pbar:
             state = self.getState(self.train_data, 0, self.state_size + 1)
             total_profit = 0
+            max_profit = 0
             self.agent.balance = []
             eps = eps_start
 
@@ -49,6 +50,12 @@ class StockExchange:
                 self.agent.step(state, action, reward, next_state, done)
                 eps = max(eps_end, eps * eps_decay)
                 state = next_state
+                
+                if done:
+                    if total_profit > max_profit:
+                        max_profit = total_profit
+                        best_model = self.agent.qnetwork_local.state_dict()
+                    
                     
             scores.append(total_profit)
             # 更新进度条的后缀信息
@@ -57,9 +64,9 @@ class StockExchange:
         model_dir = 'trained_models/'
         model_name = model_dir + filename + '.pth'
         
-        torch.save(self.agent.qnetwork_local.state_dict(), model_name)
+        torch.save(best_model, model_name)
         # plot the smoothed scores
-        smoothed_scores = pd.Series(scores).rolling(100).mean()
+        smoothed_scores = pd.Series(scores).rolling(10).mean()
         plt.figure(figsize=(8, 5), dpi=150)
         plt.plot(smoothed_scores)
         plt.xlabel('Episode')
@@ -83,7 +90,7 @@ class StockExchange:
     
     def test(self):
         l = len(self.test_data)-1
-        window_size = 10
+        window_size = self.state_size
         state = self.getState(self.test_data, 0, window_size + 1)
         total_profit = 0
         self.agent.balance = []

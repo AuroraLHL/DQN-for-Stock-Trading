@@ -1,8 +1,8 @@
 '''
 Author: Hongliang Lu, lhl@pku.edu.cn
 Date: 2024-06-27 13:43:03
-LastEditTime: 2024-06-27 13:49:17
-FilePath: /stockPrediction-master/main.py
+LastEditTime: 2024-06-27 13:58:37
+FilePath: /DQN for Stock Trading/main.py
 Description: 
 Organization: College of Engineering,Peking University.
 '''
@@ -14,11 +14,11 @@ import torch
 import pandas as pd
 from StockExchange import StockExchange
 
-STATE_SIZE = 10 # 状态空间大小
+STATE_SIZE = 12 # 状态空间大小
 EPISODE_COUNT = 100 # episode 数量
 
 data_dir = "StockData"
-filename = "GOOGL.csv"
+filename = "600967.SS.csv"
 file_dir = data_dir + "/" + filename
 
 # 使用 pandas 读取 CSV 文件
@@ -34,7 +34,6 @@ except UnicodeDecodeError:
 stockData = list(df['Close'].values)
 
 # 初始化 agent
-STATE_SIZE = 10
 agent = Agent(state_size=STATE_SIZE, action_size=3)
 l = len(stockData) - 1
 
